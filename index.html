@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HN Librería — Libros que transforman vidas</title>
+  <meta name="description" content="HN es una librería online cuidadosamente curada con literatura, ciencia, filosofía y más. Descubre libros que amplían horizontes. Envíos a todo el país." />
+  <meta name="keywords" content="librería HN, comprar libros, librería online, libros de calidad, literatura, ciencia, filosofía" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://hn-libreria.com/" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ══════════════════════════════════════
+       TOKENS & RESET
+    ══════════════════════════════════════ */
+    :root {
+      --black:   #0d0d0d;
+      --off:     #f5f3ef;
+      --mid:     #888580;
+      --faint:   #e8e5df;
+      --red:     #c0392b;      /* single accent */
+      --red-dim: #9b2d22;
+      --serif:   'DM Serif Display', Georgia, serif;
+      --sans:    'DM Sans', sans-serif;
+      --ease:    cubic-bezier(.4,0,.2,1);
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; font-size:16px; }
+    body {
+      font-family: var(--sans);
+      background: var(--off);
+      color: var(--black);
+      overflow-x: hidden;
+      cursor: none;
+    }
+    img { display:block; width:100%; height:100%; object-fit:cover; }
+    a { color:inherit; text-decoration:none; }
+    button { cursor:none; }
+
+    /* ══════════════════════════════════════
+       CUSTOM CURSOR
+    ══════════════════════════════════════ */
+    #cursor {
+      width:10px; height:10px;
+      background: var(--black);
+      border-radius:50%;
+      position:fixed; top:0; left:0;
+      pointer-events:none;
+      z-index:9999;
+      transform:translate(-50%,-50%);
+      transition: transform .15s var(--ease), background .2s, width .2s, height .2s;
+    }
+    #cursor.hover {
+      width:36px; height:36px;
+      background: transparent;
+      border:1.5px solid var(--black);
+    }
+    #cursor.click { transform:translate(-50%,-50%) scale(.7); }
+
+    /* ══════════════════════════════════════
+       LOADER
+    ══════════════════════════════════════ */
+    #loader {
+      position:fixed; inset:0;
+      background:var(--black);
+      z-index:9000;
+      display:flex; align-items:center; justify-content:center;
+      transition:opacity .6s var(--ease), visibility .6s;
+    }
+    #loader.gone { opacity:0; visibility:hidden; }
+    .loader-word {
+      font-family:var(--serif);
+      font-size:clamp(3rem,8vw,7rem);
+      color:var(--off);
+      letter-spacing:-.02em;
+      overflow:hidden;
+    }
+    .loader-word span {
+      display:inline-block;
+      animation: loaderRise .8s var(--ease) both;
+    }
+    .loader-word span:nth-child(2) { animation-delay:.07s; }
+    @keyframes loaderRise {
+      from { transform:translateY(100%); opacity:0; }
+      to   { transform:translateY(0);    opacity:1; }
+    }
+
+    /* ══════════════════════════════════════
+       NAV
+    ══════════════════════════════════════ */
+    nav {
+      position:fixed; top:0; left:0; right:0;
+      z-index:800;
+      mix-blend-mode:normal;
+      padding:0 3rem;
+      height:64px;
+      display:flex; align-items:center; justify-content:space-between;
+      background:rgba(245,243,239,.92);
+      backdrop-filter:blur(16px);
+      border-bottom:1px solid var(--faint);
+      transition:background .3s;
+    }
+    .nav-logo {
+      font-family:var(--serif);
+      font-size:1.65rem;
+      letter-spacing:.04em;
+      display:flex; align-items:baseline; gap:.2rem;
+    }
+    .nav-logo em { color:var(--red); font-style:normal; }
+    .nav-menu { display:flex; gap:2.5rem; list-style:none; }
+    .nav-menu a {
+      font-size:.8rem;
+      font-weight:500;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--mid);
+      transition:color .2s;
+      position:relative;
+    }
+    .nav-menu a::after {
+      content:'';
+      position:absolute; bottom:-2px; left:0;
+      width:0; height:1px;
+      background:var(--red);
+      transition:width .3s var(--ease);
+    }
+    .nav-menu a:hover { color:var(--black); }
+    .nav-menu a:hover::after { width:100%; }
+    .nav-right { display:flex; align-items:center; gap:1.5rem; }
+    .nav-cta {
+      font-size:.78rem;
+      font-weight:500;
+      letter-spacing:.1em;
+      text-transform:uppercase;
+      border:1px solid var(--black);
+      padding:.45rem 1.1rem;
+      transition:all .2s;
+    }
+    .nav-cta:hover { background:var(--black); color:var(--off); }
+    .hamburger { display:none; flex-direction:column; gap:5px; background:none; border:none; padding:4px; }
+    .hamburger span { display:block; width:22px; height:1.5px; background:var(--black); transition:.3s; }
+
+    /* ══════════════════════════════════════
+       HERO
+    ══════════════════════════════════════ */
+    #inicio {
+      min-height:100vh;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      padding-top:64px;
+      overflow:hidden;
+    }
+    .hero-left {
+      display:flex; flex-direction:column; justify-content:center;
+      padding:5rem 4rem 5rem 3rem;
+      position:relative;
+    }
+    .hero-eyebrow {
+      font-size:.72rem;
+      font-weight:500;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      color:var(--mid);
+      margin-bottom:2rem;
+      display:flex; align-items:center; gap:1rem;
+    }
+    .hero-eyebrow::before {
+      content:'';
+      display:block;
+      width:32px; height:1px;
+      background:var(--red);
+    }
+    .hero-h1 {
+      font-family:var(--serif);
+      font-size:clamp(3.2rem,5.5vw,5.8rem);
+      line-height:1.02;
+      letter-spacing:-.02em;
+      color:var(--black);
+      margin-bottom:2rem;
+    }
+    .hero-h1 em { font-style:italic; color:var(--red); }
+    .hero-body {
+      font-size:1rem;
+      font-weight:300;
+      line-height:1.75;
+      color:#555;
+      max-width:400px;
+      margin-bottom:3rem;
+    }
+    .hero-actions { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; }
+    .btn-fill {
+      display:inline-flex; align-items:center; gap:.5rem;
+      background:var(--black); color:var(--off);
+      padding:.8rem 2rem;
+      font-family:var(--sans);
+      font-size:.82rem;
+      font-weight:500;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      border:1px solid var(--black);
+      transition:all .25s var(--ease);
+    }
+    .btn-fill:hover { background:var(--red); border-color:var(--red); }
+    .btn-ghost {
+      display:inline-flex; align-items:center; gap:.5rem;
+      color:var(--black);
+      font-size:.82rem;
+      font-weight:500;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      border-bottom:1px solid var(--black);
+      padding-bottom:2px;
+      transition:all .25s;
+    }
+    .btn-ghost:hover { color:var(--red); border-color:var(--red); }
+    .hero-counter {
+      margin-top:4rem;
+      display:flex; gap:3rem;
+      padding-top:2.5rem;
+      border-top:1px solid var(--faint);
+    }
+    .counter-num {
+      font-family:var(--serif);
+      font-size:2.4rem;
+      color:var(--black);
+      line-height:1;
+    }
+    .counter-label {
+      font-size:.72rem;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--mid);
+      margin-top:.25rem;
+    }
+    .hero-right {
+      position:relative;
+      overflow:hidden;
+      background:var(--black);
+    }
+    .hero-img-main {
+      position:absolute; inset:0;
+      opacity:.75;
+    }
+    .hero-img-main img { filter:grayscale(30%); }
+    .hero-overlay {
+      position:absolute; inset:0;
+      background:linear-gradient(135deg, rgba(13,13,13,.6) 0%, rgba(13,13,13,.1) 100%);
+    }
+    .hero-right-content {
+      position:relative; z-index:2;
+      height:100%;
+      display:flex; flex-direction:column; justify-content:flex-end;
+      padding:3rem;
+    }
+    .hero-featured-label {
+      font-size:.65rem;
+      letter-spacing:.2em;
+      text-transform:uppercase;
+      color:rgba(245,243,239,.6);
+      margin-bottom:.6rem;
+    }
+    .hero-featured-title {
+      font-family:var(--serif);
+      font-size:2rem;
+      color:var(--off);
+      line-height:1.15;
+      margin-bottom:.4rem;
+    }
+    .hero-featured-author { font-size:.88rem; color:rgba(245,243,239,.6); margin-bottom:1.25rem; }
+    .hero-featured-price {
+      font-family:var(--serif);
+      font-size:1.6rem;
+      color:var(--off);
+    }
+    .hero-scroll-indicator {
+      position:absolute;
+      bottom:2rem; left:50%;
+      transform:translateX(-50%);
+      display:flex; flex-direction:column; align-items:center; gap:.5rem;
+      color:var(--mid);
+      font-size:.65rem;
+      letter-spacing:.15em;
+      text-transform:uppercase;
+      animation:bounce 2s ease-in-out infinite;
+    }
+    @keyframes bounce {
+      0%,100% { transform:translateX(-50%) translateY(0); }
+      50%      { transform:translateX(-50%) translateY(6px); }
+    }
+
+    /* ══════════════════════════════════════
+       TRUST BAR
+    ══════════════════════════════════════ */
+    .trust-bar {
+      background:var(--black);
+      padding:.9rem 3rem;
+      display:flex; justify-content:center; gap:4rem;
+      flex-wrap:wrap;
+    }
+    .trust-item {
+      display:flex; align-items:center; gap:.6rem;
+      font-size:.75rem;
+      font-weight:500;
+      letter-spacing:.1em;
+      text-transform:uppercase;
+      color:rgba(245,243,239,.55);
+    }
+    .trust-item svg { color:var(--red); flex-shrink:0; }
+
+    /* ══════════════════════════════════════
+       SECTION WRAPPER
+    ══════════════════════════════════════ */
+    .section { padding:7rem 3rem; }
+    .section-head {
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      margin-bottom:4rem;
+      gap:2rem;
+      flex-wrap:wrap;
+    }
+    .section-tag {
+      font-size:.68rem;
+      font-weight:500;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      color:var(--red);
+      display:flex; align-items:center; gap:.75rem;
+      margin-bottom:.75rem;
+    }
+    .section-tag::before { content:''; display:block; width:20px; height:1px; background:var(--red); }
+    .section-h2 {
+      font-family:var(--serif);
+      font-size:clamp(2rem,3.5vw,3.2rem);
+      line-height:1.1;
+      letter-spacing:-.01em;
+    }
+    .section-sub {
+      font-size:.92rem;
+      color:var(--mid);
+      max-width:420px;
+      line-height:1.7;
+    }
+
+    /* ══════════════════════════════════════
+       CATALOGUE GRID
+    ══════════════════════════════════════ */
+    #catalogo { background:var(--off); }
+    .filter-row {
+      display:flex; gap:.5rem;
+      margin-bottom:3rem;
+      flex-wrap:wrap;
+    }
+    .ftab {
+      padding:.38rem 1rem;
+      font-size:.72rem;
+      font-weight:500;
+      letter-spacing:.1em;
+      text-transform:uppercase;
+      border:1px solid var(--faint);
+      background:transparent;
+      color:var(--mid);
+      transition:all .2s;
+      font-family:var(--sans);
+    }
+    .ftab.on, .ftab:hover { border-color:var(--black); background:var(--black); color:var(--off); }
+
+    .books-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(200px,1fr));
+      gap:2.5rem 2rem;
+    }
+    .bcard {
+      display:flex; flex-direction:column;
+      transition:transform .3s var(--ease);
+    }
+    .bcard:hover { transform:translateY(-6px); }
+    .bcard-cover {
+      aspect-ratio:2/3;
+      overflow:hidden;
+      position:relative;
+      background:var(--faint);
+      margin-bottom:1.1rem;
+    }
+    .bcard-cover img { transition:transform .5s var(--ease); }
+    .bcard:hover .bcard-cover img { transform:scale(1.04); }
+    .bcard-fmt {
+      position:absolute; top:.6rem; right:.6rem;
+      font-size:.6rem;
+      font-weight:500;
+      letter-spacing:.1em;
+      text-transform:uppercase;
+      padding:.2rem .55rem;
+      background:var(--black);
+      color:var(--off);
+    }
+    .bcard-fmt.d { background:var(--red); }
+    .bcard-fmt.b { background:var(--black); }
+    .bcard-genre {
+      font-size:.65rem;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:var(--mid);
+      margin-bottom:.3rem;
+    }
+    .bcard-title {
+      font-family:var(--serif);
+      font-size:1.05rem;
+      line-height:1.25;
+      margin-bottom:.2rem;
+    }
+    .bcard-author { font-size:.82rem; color:var(--mid); margin-bottom:.7rem; }
+    .bcard-desc {
+      font-size:.82rem;
+      color:#666;
+      line-height:1.6;
+      flex:1;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+      margin-bottom:.8rem;
+    }
+    .bcard-foot {
+      display:flex; align-items:center; justify-content:space-between;
+      padding-top:.75rem;
+      border-top:1px solid var(--faint);
+    }
+    .bcard-price {
+      font-family:var(--serif);
+      font-size:1.25rem;
+      color:var(--black);
+    }
+    .bcard-price sub { font-family:var(--sans); font-size:.7rem; vertical-align:super; }
+    .bcard-old { font-size:.75rem; color:var(--mid); text-decoration:line-through; margin-left:.4rem; }
+    .bcard-btn {
+      width:32px; height:32px;
+      border:1px solid var(--black);
+      background:transparent;
+      display:flex; align-items:center; justify-content:center;
+      transition:all .2s;
+      font-family:var(--sans);
+    }
+    .bcard-btn:hover { background:var(--black); color:var(--off); }
+    .load-more-wrap { text-align:center; margin-top:3.5rem; }
+
+    /* ══════════════════════════════════════
+       FEATURED / DESTACADOS
+    ══════════════════════════════════════ */
+    #destacados { background:var(--black); }
+    #destacados .section-h2 { color:var(--off); }
+    #destacados .section-sub { color:rgba(245,243,239,.45); }
+
+    .feat-layout {
+      display:grid;
+      grid-template-columns:1.3fr 1fr;
+      gap:1.5px;
+      background:rgba(255,255,255,.06);
+    }
+    .feat-hero {
+      position:relative;
+      min-height:540px;
+      overflow:hidden;
+      display:flex; align-items:flex-end;
+    }
+    .feat-hero-bg { position:absolute; inset:0; }
+    .feat-hero-bg img { filter:brightness(.45) grayscale(20%); }
+    .feat-hero-content {
+      position:relative; z-index:2;
+      padding:3rem;
+    }
+    .feat-tag { font-size:.65rem; letter-spacing:.2em; text-transform:uppercase; color:var(--red); margin-bottom:.6rem; }
+    .feat-title {
+      font-family:var(--serif);
+      font-size:2.4rem;
+      color:var(--off);
+      line-height:1.1;
+      margin-bottom:.35rem;
+    }
+    .feat-author { font-size:.88rem; color:rgba(245,243,239,.55); margin-bottom:1rem; }
+    .feat-price {
+      font-family:var(--serif);
+      font-size:1.8rem;
+      color:var(--off);
+      margin-bottom:1.5rem;
+    }
+    .feat-actions { display:flex; gap:.75rem; flex-wrap:wrap; }
+    .btn-fill-light {
+      display:inline-flex; align-items:center; gap:.5rem;
+      background:var(--off); color:var(--black);
+      padding:.7rem 1.6rem;
+      font-size:.78rem; font-weight:500;
+      letter-spacing:.08em; text-transform:uppercase;
+      border:1px solid var(--off);
+      transition:all .2s;
+      font-family:var(--sans);
+    }
+    .btn-fill-light:hover { background:var(--red); color:var(--off); border-color:var(--red); }
+    .btn-ghost-light {
+      display:inline-flex; align-items:center; gap:.5rem;
+      color:rgba(245,243,239,.7);
+      font-size:.78rem; font-weight:500;
+      letter-spacing:.08em; text-transform:uppercase;
+      border-bottom:1px solid rgba(245,243,239,.3);
+      padding-bottom:2px;
+      font-family:var(--sans);
+      transition:color .2s, border-color .2s;
+    }
+    .btn-ghost-light:hover { color:var(--red); border-color:var(--red); }
+
+    .feat-stack { display:flex; flex-direction:column; gap:1.5px; }
+    .feat-mini {
+      padding:2rem 2.5rem;
+      display:flex; gap:1.5rem; align-items:center;
+      background:rgba(255,255,255,.04);
+      transition:background .2s;
+      cursor:none;
+    }
+    .feat-mini:hover { background:rgba(255,255,255,.08); }
+    .feat-mini-cover { width:56px; flex-shrink:0; aspect-ratio:2/3; overflow:hidden; }
+    .feat-mini-title { font-family:var(--serif); font-size:1.05rem; color:var(--off); margin-bottom:.2rem; }
+    .feat-mini-author { font-size:.8rem; color:rgba(245,243,239,.45); margin-bottom:.4rem; }
+    .feat-mini-price { font-family:var(--serif); font-size:1.1rem; color:var(--red); }
+
+    /* ══════════════════════════════════════
+       NOSOTROS
+    ══════════════════════════════════════ */
+    #nosotros { background:var(--off); }
+    .nosotros-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:6rem;
+      align-items:center;
+    }
+    .nosotros-visual { position:relative; }
+    .nosotros-img {
+      aspect-ratio:3/4;
+      overflow:hidden;
+      filter:grayscale(15%);
+    }
+    .nosotros-number {
+      position:absolute;
+      top:-2rem; right:-2rem;
+      font-family:var(--serif);
+      font-size:9rem;
+      line-height:1;
+      color:var(--faint);
+      z-index:-1;
+      user-select:none;
+    }
+    .nosotros-text .section-tag { margin-bottom:.5rem; }
+    .nosotros-body {
+      font-size:.97rem;
+      color:#555;
+      line-height:1.8;
+      margin-top:1.25rem;
+    }
+    .nosotros-values {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:1.25rem;
+      margin-top:2.5rem;
+    }
+    .val-item {
+      padding:1.5rem;
+      background:var(--off);
+      border:1px solid var(--faint);
+      border-top:2px solid var(--red);
+      transition:border-top-color .2s, transform .2s;
+    }
+    .val-item:hover { transform:translateY(-3px); }
+    .val-num {
+      font-family:var(--serif);
+      font-size:1.8rem;
+      color:var(--red);
+      line-height:1;
+      margin-bottom:.4rem;
+    }
+    .val-title { font-weight:500; font-size:.9rem; margin-bottom:.3rem; }
+    .val-body { font-size:.82rem; color:var(--mid); line-height:1.55; }
+
+    /* ══════════════════════════════════════
+       TESTIMONIOS
+    ══════════════════════════════════════ */
+    #testimonios { background:var(--faint); }
+    .test-grid {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:1.5px;
+      background:var(--faint);
+      margin-top:3rem;
+    }
+    .test-card {
+      background:var(--off);
+      padding:2.5rem;
+    }
+    .test-quote {
+      font-family:var(--serif);
+      font-size:1rem;
+      font-style:italic;
+      line-height:1.75;
+      color:#444;
+      margin-bottom:1.5rem;
+    }
+    .test-name { font-size:.82rem; font-weight:500; letter-spacing:.06em; }
+    .test-role { font-size:.75rem; color:var(--mid); margin-top:.2rem; }
+    .test-stars { color:var(--red); font-size:.75rem; margin-bottom:1rem; }
+
+    /* ══════════════════════════════════════
+       CONTACTO
+    ══════════════════════════════════════ */
+    #contacto { background:var(--off); }
+    .contacto-grid {
+      display:grid;
+      grid-template-columns:1fr 1.2fr;
+      gap:6rem;
+      align-items:start;
+    }
+    .contact-list { margin-top:2rem; display:flex; flex-direction:column; gap:1.5rem; }
+    .clist-item { display:flex; gap:1.25rem; align-items:flex-start; }
+    .clist-icon {
+      width:40px; height:40px; flex-shrink:0;
+      background:var(--black);
+      color:var(--off);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .clist-label { font-size:.68rem; letter-spacing:.15em; text-transform:uppercase; color:var(--mid); margin-bottom:.25rem; }
+    .clist-val { font-size:.95rem; }
+    .contact-form-wrap {
+      background:var(--black);
+      padding:3rem;
+    }
+    .contact-form-wrap h3 {
+      font-family:var(--serif);
+      font-size:1.6rem;
+      color:var(--off);
+      margin-bottom:2rem;
+    }
+    .fg { margin-bottom:1.25rem; }
+    .fg label { display:block; font-size:.68rem; letter-spacing:.15em; text-transform:uppercase; color:rgba(245,243,239,.4); margin-bottom:.45rem; }
+    .fg input, .fg textarea, .fg select {
+      width:100%; padding:.75rem 1rem;
+      background:rgba(245,243,239,.07);
+      border:1px solid rgba(245,243,239,.12);
+      color:var(--off);
+      font-family:var(--sans);
+      font-size:.95rem;
+      outline:none;
+      transition:border-color .2s;
+    }
+    .fg input:focus, .fg textarea:focus, .fg select:focus { border-color:var(--red); }
+    .fg textarea { height:110px; resize:vertical; }
+    .fg select option { background:var(--black); }
+    .fg-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+
+    /* ══════════════════════════════════════
+       LEGALES
+    ══════════════════════════════════════ */
+    #legales { background:var(--faint); }
+    .legales-grid {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:1.5px;
+      background:var(--faint);
+      margin-top:3rem;
+    }
+    .legal-card {
+      background:var(--off);
+      padding:2.5rem;
+    }
+    .legal-icon { font-size:1.8rem; margin-bottom:1rem; }
+    .legal-h3 {
+      font-family:var(--serif);
+      font-size:1.2rem;
+      margin-bottom:.75rem;
+    }
+    .legal-body { font-size:.86rem; color:#666; line-height:1.7; }
+    .legal-more {
+      display:inline-block;
+      margin-top:1.25rem;
+      font-size:.75rem;
+      font-weight:500;
+      letter-spacing:.1em;
+      text-transform:uppercase;
+      color:var(--red);
+      border-bottom:1px solid var(--red);
+      padding-bottom:1px;
+      transition:opacity .2s;
+    }
+    .legal-more:hover { opacity:.7; }
+
+    /* ══════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════ */
+    footer {
+      background:var(--black);
+      padding:5rem 3rem 2.5rem;
+    }
+    .footer-top {
+      display:grid;
+      grid-template-columns:2fr 1fr 1fr 1.5fr;
+      gap:4rem;
+      padding-bottom:4rem;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .footer-brand-logo {
+      font-family:var(--serif);
+      font-size:2rem;
+      color:var(--off);
+      margin-bottom:1.25rem;
+      display:block;
+    }
+    .footer-brand-logo em { color:var(--red); font-style:normal; }
+    .footer-brand-desc { font-size:.88rem; color:rgba(245,243,239,.4); line-height:1.7; max-width:260px; }
+    .footer-socials { display:flex; gap:.75rem; margin-top:1.5rem; }
+    .social-btn {
+      width:34px; height:34px;
+      border:1px solid rgba(255,255,255,.15);
+      color:rgba(245,243,239,.4);
+      display:flex; align-items:center; justify-content:center;
+      transition:all .2s;
+    }
+    .social-btn:hover { border-color:var(--red); color:var(--red); }
+    .footer-col h4 {
+      font-size:.65rem;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      color:var(--red);
+      margin-bottom:1.5rem;
+    }
+    .footer-links { list-style:none; display:flex; flex-direction:column; gap:.7rem; }
+    .footer-links a { font-size:.86rem; color:rgba(245,243,239,.4); transition:color .2s; }
+    .footer-links a:hover { color:var(--off); }
+    .footer-news p { font-size:.86rem; color:rgba(245,243,239,.4); line-height:1.6; margin-bottom:1rem; }
+    .news-form { display:flex; }
+    .news-input {
+      flex:1; padding:.6rem .9rem;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      border-right:none;
+      color:var(--off);
+      font-family:var(--sans);
+      font-size:.86rem;
+      outline:none;
+    }
+    .news-submit {
+      padding:0 1rem;
+      background:var(--red); color:var(--off);
+      border:none; font-size:.78rem;
+      font-weight:500;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-family:var(--sans);
+      transition:background .2s;
+    }
+    .news-submit:hover { background:var(--red-dim); }
+    .footer-bottom {
+      display:flex; justify-content:space-between; align-items:center;
+      padding-top:2rem; gap:1rem; flex-wrap:wrap;
+    }
+    .footer-copy { font-size:.78rem; color:rgba(245,243,239,.25); }
+    .footer-legal-links { display:flex; gap:2rem; }
+    .footer-legal-links a { font-size:.75rem; color:rgba(245,243,239,.25); transition:color .2s; }
+    .footer-legal-links a:hover { color:rgba(245,243,239,.6); }
+
+    /* ══════════════════════════════════════
+       MODAL
+    ══════════════════════════════════════ */
+    .modal-wrap {
+      position:fixed; inset:0;
+      background:rgba(13,13,13,.88);
+      z-index:2000;
+      display:flex; align-items:center; justify-content:center;
+      padding:2rem;
+      opacity:0; pointer-events:none;
+      transition:opacity .3s var(--ease);
+    }
+    .modal-wrap.open { opacity:1; pointer-events:all; }
+    .modal-box {
+      background:var(--off);
+      max-width:820px; width:100%;
+      max-height:90vh; overflow-y:auto;
+      position:relative;
+      transform:translateY(20px);
+      transition:transform .35s var(--ease);
+    }
+    .modal-wrap.open .modal-box { transform:translateY(0); }
+    .modal-x {
+      position:absolute; top:1.2rem; right:1.2rem;
+      width:32px; height:32px;
+      background:var(--black); color:var(--off);
+      border:none; display:flex; align-items:center; justify-content:center;
+      font-size:1rem; z-index:5;
+    }
+    .modal-x:hover { background:var(--red); }
+    .modal-body {
+      display:grid;
+      grid-template-columns:260px 1fr;
+    }
+    .modal-cover { aspect-ratio:2/3; overflow:hidden; background:var(--faint); }
+    .modal-info { padding:3rem 2.5rem; }
+    .modal-tag { font-size:.65rem; letter-spacing:.18em; text-transform:uppercase; color:var(--red); margin-bottom:.5rem; }
+    .modal-title { font-family:var(--serif); font-size:2rem; line-height:1.15; margin-bottom:.35rem; }
+    .modal-author { font-size:.9rem; color:var(--mid); margin-bottom:1.25rem; }
+    .modal-desc { font-size:.93rem; color:#555; line-height:1.75; padding-left:1rem; border-left:2px solid var(--red); margin-bottom:1.5rem; }
+    .modal-bio { background:var(--faint); padding:1rem 1.25rem; margin-bottom:1.5rem; }
+    .modal-bio h4 { font-size:.65rem; letter-spacing:.15em; text-transform:uppercase; color:var(--mid); margin-bottom:.3rem; }
+    .modal-bio p { font-size:.86rem; line-height:1.6; }
+    .modal-pricing { display:flex; align-items:baseline; gap:1.5rem; margin-bottom:.5rem; flex-wrap:wrap; }
+    .modal-price { font-family:var(--serif); font-size:2.4rem; }
+    .modal-format { font-size:.8rem; color:var(--mid); }
+    .modal-cta { display:flex; gap:.75rem; margin-top:1.5rem; flex-wrap:wrap; }
+
+    /* ══════════════════════════════════════
+       BACK TO TOP + NOTIF
+    ══════════════════════════════════════ */
+    #btt {
+      position:fixed; bottom:2rem; right:2rem;
+      width:40px; height:40px;
+      background:var(--black); color:var(--off);
+      border:none; display:flex; align-items:center; justify-content:center;
+      opacity:0; pointer-events:none;
+      transition:all .3s; z-index:700;
+    }
+    #btt.show { opacity:1; pointer-events:all; }
+    #btt:hover { background:var(--red); }
+    .toast {
+      position:fixed; bottom:5rem; right:2rem;
+      background:var(--black); color:var(--off);
+      padding:.85rem 1.5rem;
+      font-size:.82rem;
+      display:flex; align-items:center; gap:.75rem;
+      transform:translateX(200%);
+      transition:transform .35s var(--ease);
+      z-index:3000;
+    }
+    .toast.show { transform:translateX(0); }
+
+    /* ══════════════════════════════════════
+       SCROLL REVEALS
+    ══════════════════════════════════════ */
+    .reveal { opacity:0; transform:translateY(28px); transition:opacity .7s var(--ease), transform .7s var(--ease); }
+    .reveal.on { opacity:1; transform:none; }
+    .reveal-delay-1 { transition-delay:.1s; }
+    .reveal-delay-2 { transition-delay:.2s; }
+    .reveal-delay-3 { transition-delay:.3s; }
+
+    /* ══════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════ */
+    @media (max-width:1024px) {
+      .footer-top { grid-template-columns:1fr 1fr; }
+      .feat-layout { grid-template-columns:1fr; }
+      .feat-stack { flex-direction:row; }
+      .feat-mini { flex:1; }
+    }
+    @media (max-width:768px) {
+      nav { padding:0 1.5rem; }
+      .nav-menu, .nav-cta { display:none; }
+      .hamburger { display:flex; }
+      .section { padding:5rem 1.5rem; }
+      #inicio { grid-template-columns:1fr; min-height:auto; }
+      .hero-left { padding:4rem 1.5rem 3rem; }
+      .hero-right { min-height:50vw; }
+      .hero-counter { gap:1.5rem; }
+      .nosotros-grid, .contacto-grid { grid-template-columns:1fr; gap:3rem; }
+      .nosotros-number { display:none; }
+      .test-grid { grid-template-columns:1fr; }
+      .legales-grid { grid-template-columns:1fr; }
+      .modal-body { grid-template-columns:1fr; }
+      .modal-cover { aspect-ratio:16/7; max-height:180px; }
+      .footer-top { grid-template-columns:1fr; gap:2.5rem; }
+      .trust-bar { gap:2rem; padding:.9rem 1.5rem; }
+      .nosotros-values { grid-template-columns:1fr; }
+    }
+    @media (max-width:480px) {
+      .hero-h1 { font-size:2.6rem; }
+      .feat-stack { flex-direction:column; }
+      .footer-bottom { flex-direction:column; align-items:flex-start; }
+      .fg-row { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div id="cursor"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <p class="loader-word" aria-hidden="true">
+    <span>H</span><span>N</span>
+  </p>
+</div>
+
+<!-- NAV -->
+<nav role="navigation" aria-label="Menú principal">
+  <a href="#inicio" class="nav-logo" aria-label="HN Librería — Inicio">H<em>N</em></a>
+  <ul class="nav-menu">
+    <li><a href="#inicio">Inicio</a></li>
+    <li><a href="#catalogo">Catálogo</a></li>
+    <li><a href="#destacados">Destacados</a></li>
+    <li><a href="#nosotros">Nosotros</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="#catalogo" class="nav-cta">Ver libros</a>
+    <button class="hamburger" aria-label="Abrir menú" onclick="toggleNav()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE NAV -->
+<div id="mobileNav" style="display:none;position:fixed;top:64px;left:0;right:0;background:var(--off);z-index:799;padding:2.5rem 1.5rem;border-bottom:1px solid var(--faint);">
+  <ul style="list-style:none;display:flex;flex-direction:column;gap:1.75rem;">
+    <li><a href="#inicio" style="font-family:var(--serif);font-size:1.5rem;" onclick="toggleNav()">Inicio</a></li>
+    <li><a href="#catalogo" style="font-family:var(--serif);font-size:1.5rem;" onclick="toggleNav()">Catálogo</a></li>
+    <li><a href="#destacados" style="font-family:var(--serif);font-size:1.5rem;" onclick="toggleNav()">Destacados</a></li>
+    <li><a href="#nosotros" style="font-family:var(--serif);font-size:1.5rem;" onclick="toggleNav()">Nosotros</a></li>
+    <li><a href="#contacto" style="font-family:var(--serif);font-size:1.5rem;" onclick="toggleNav()">Contacto</a></li>
+  </ul>
+</div>
+
+<!-- ══ HERO ══ -->
+<section id="inicio" aria-labelledby="h1-main">
+  <div class="hero-left">
+    <p class="hero-eyebrow">Librería HN — Est. 2019</p>
+    <h1 class="hero-h1" id="h1-main">Libros que<br>abren <em>mundos</em></h1>
+    <p class="hero-body">Selección editorial cuidadosa de literatura, ciencia, filosofía e historia. Libros físicos con envío nacional y formatos digitales de descarga inmediata.</p>
+    <div class="hero-actions">
+      <a href="#catalogo" class="btn-fill">Explorar catálogo</a>
+      <a href="#nosotros" class="btn-ghost">Nuestra historia →</a>
+    </div>
+    <div class="hero-counter">
+      <div>
+        <div class="counter-num">5K+</div>
+        <div class="counter-label">Títulos</div>
+      </div>
+      <div>
+        <div class="counter-num">28K</div>
+        <div class="counter-label">Lectores</div>
+      </div>
+      <div>
+        <div class="counter-num">4.9</div>
+        <div class="counter-label">Valoración</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-right" role="img" aria-label="Ambiente de librería con estantes repletos de libros">
+    <div class="hero-img-main">
+      <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=900&h=1100&fit=crop" alt="" aria-hidden="true" loading="eager" />
+    </div>
+    <div class="hero-overlay"></div>
+    <div class="hero-right-content">
+      <p class="hero-featured-label">Libro del mes</p>
+      <h2 class="hero-featured-title">El nombre<br>del viento</h2>
+      <p class="hero-featured-author">Patrick Rothfuss</p>
+      <p class="hero-featured-price">$42.000 COP</p>
+    </div>
+    <div class="hero-scroll-indicator" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="6 9 12 15 18 9"/></svg>
+      Scroll
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar" role="complementary" aria-label="Garantías de compra">
+  <div class="trust-item">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    Envío gratis +$50.000
+  </div>
+  <div class="trust-item">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Pago 100% seguro
+  </div>
+  <div class="trust-item">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+    Devolución 30 días
+  </div>
+  <div class="trust-item">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+    Digital: descarga inmediata
+  </div>
+</div>
+
+<!-- ══ CATÁLOGO ══ -->
+<section id="catalogo" class="section" aria-labelledby="cat-h2">
+  <div class="section-head">
+    <div>
+      <p class="section-tag">Nuestro catálogo</p>
+      <h2 class="section-h2" id="cat-h2">Libros para cada lector</h2>
+    </div>
+    <p class="section-sub">Ofrecemos libros en formato físico (entrega 3–7 días) y digital (descarga inmediata). Cada tarjeta indica el formato disponible.</p>
+  </div>
+  <div class="filter-row" role="group" aria-label="Filtrar libros">
+    <button class="ftab on" onclick="filterCat('todos',this)">Todos</button>
+    <button class="ftab" onclick="filterCat('literatura',this)">Literatura</button>
+    <button class="ftab" onclick="filterCat('ciencia',this)">Ciencia</button>
+    <button class="ftab" onclick="filterCat('historia',this)">Historia</button>
+    <button class="ftab" onclick="filterCat('filosofia',this)">Filosofía</button>
+  </div>
+  <div class="books-grid" id="grid"></div>
+  <div class="load-more-wrap">
+    <button class="btn-ghost" onclick="showMore()">Ver más títulos →</button>
+  </div>
+</section>
+
+<!-- ══ DESTACADOS ══ -->
+<section id="destacados" class="section" aria-labelledby="dest-h2">
+  <div class="section-head">
+    <div>
+      <p class="section-tag">Selección editorial</p>
+      <h2 class="section-h2" id="dest-h2">Más recomendados</h2>
+    </div>
+  </div>
+  <div class="feat-layout reveal">
+    <div class="feat-hero">
+      <div class="feat-hero-bg">
+        <img src="https://images.unsplash.com/photo-1587560699334-cc4ff634909a?w=700&h=600&fit=crop" alt="Portada El nombre del viento" loading="lazy" />
+      </div>
+      <div class="feat-hero-content">
+        <p class="feat-tag">★ Elección del editor</p>
+        <h3 class="feat-title">El nombre del viento</h3>
+        <p class="feat-author">Patrick Rothfuss</p>
+        <p class="feat-price">$42.000 COP</p>
+        <div class="feat-actions">
+          <button class="btn-fill-light" onclick="openModal(0)">Ver detalles</button>
+          <button class="btn-ghost-light" onclick="addCart('El nombre del viento')">+ Carrito</button>
+        </div>
+      </div>
+    </div>
+    <div class="feat-stack">
+      <div class="feat-mini" onclick="openModal(1)" role="button" tabindex="0" aria-label="Ver Sapiens de Harari">
+        <div class="feat-mini-cover"><img src="https://images.unsplash.com/photo-1589998059171-988d887df646?w=120&h=180&fit=crop" alt="Portada Sapiens" loading="lazy"/></div>
+        <div>
+          <h3 class="feat-mini-title">Sapiens</h3>
+          <p class="feat-mini-author">Yuval Noah Harari</p>
+          <p class="feat-mini-price">$38.000</p>
+        </div>
+      </div>
+      <div class="feat-mini" onclick="openModal(2)" role="button" tabindex="0" aria-label="Ver Cosmos de Sagan">
+        <div class="feat-mini-cover"><img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=120&h=180&fit=crop" alt="Portada Cosmos" loading="lazy"/></div>
+        <div>
+          <h3 class="feat-mini-title">Cosmos</h3>
+          <p class="feat-mini-author">Carl Sagan</p>
+          <p class="feat-mini-price">$35.000</p>
+        </div>
+      </div>
+      <div class="feat-mini" onclick="openModal(3)" role="button" tabindex="0" aria-label="Ver 1984 de Orwell">
+        <div class="feat-mini-cover"><img src="https://images.unsplash.com/photo-1495640388908-05fa85288e61?w=120&h=180&fit=crop" alt="Portada 1984" loading="lazy"/></div>
+        <div>
+          <h3 class="feat-mini-title">1984</h3>
+          <p class="feat-mini-author">George Orwell</p>
+          <p class="feat-mini-price">$28.000</p>
+        </div>
+      </div>
+      <div class="feat-mini" onclick="openModal(4)" role="button" tabindex="0" aria-label="Ver El principito">
+        <div class="feat-mini-cover"><img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=120&h=180&fit=crop" alt="Portada El principito" loading="lazy"/></div>
+        <div>
+          <h3 class="feat-mini-title">El principito</h3>
+          <p class="feat-mini-author">A. de Saint-Exupéry</p>
+          <p class="feat-mini-price">$22.000</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ NOSOTROS ══ -->
+<section id="nosotros" class="section" aria-labelledby="nos-h2">
+  <div class="nosotros-grid">
+    <div class="nosotros-visual reveal">
+      <div class="nosotros-img">
+        <img src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&h=800&fit=crop" alt="Estantes con libros en la librería HN" loading="lazy" />
+      </div>
+      <span class="nosotros-number" aria-hidden="true">HN</span>
+    </div>
+    <div class="nosotros-text reveal reveal-delay-1">
+      <p class="section-tag">Nuestra historia</p>
+      <h2 class="section-h2" id="nos-h2">Una librería nacida del amor por los libros</h2>
+      <p class="nosotros-body">
+        <strong>HN Librería</strong> fue fundada en 2019 con una convicción simple: los libros correctos en manos correctas pueden cambiar vidas. Comenzamos como un pequeño proyecto editorial y hoy somos una librería online con más de 5.000 títulos disponibles.
+      </p>
+      <p class="nosotros-body" style="margin-top:1rem;">
+        Trabajamos directamente con editoriales para garantizar la mejor calidad a precios justos. Nuestro catálogo abarca Literatura contemporánea y clásica, Ciencias, Historia, Filosofía y Educación, siempre con criterio editorial y honestidad.
+      </p>
+      <div class="nosotros-values">
+        <div class="val-item reveal reveal-delay-1">
+          <div class="val-num">01</div>
+          <div class="val-title">Curaduría honesta</div>
+          <div class="val-body">Solo publicamos libros que hemos leído y validado.</div>
+        </div>
+        <div class="val-item reveal reveal-delay-2">
+          <div class="val-num">02</div>
+          <div class="val-title">Precios transparentes</div>
+          <div class="val-body">Sin cargos ocultos. El precio que ves es el que pagas.</div>
+        </div>
+        <div class="val-item reveal reveal-delay-1">
+          <div class="val-num">03</div>
+          <div class="val-title">Calidad garantizada</div>
+          <div class="val-body">Libros de editoriales verificadas, embalaje cuidadoso.</div>
+        </div>
+        <div class="val-item reveal reveal-delay-2">
+          <div class="val-num">04</div>
+          <div class="val-title">Soporte real</div>
+          <div class="val-body">Atención por personas reales, no bots.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TESTIMONIOS ══ -->
+<section id="testimonios" class="section" aria-labelledby="test-h2">
+  <div style="text-align:center;">
+    <p class="section-tag" style="justify-content:center;margin-bottom:.5rem;">Reseñas verificadas</p>
+    <h2 class="section-h2" id="test-h2">Lo que dicen nuestros lectores</h2>
+  </div>
+  <div class="test-grid">
+    <article class="test-card reveal">
+      <div class="test-stars" aria-label="5 de 5 estrellas">★★★★★</div>
+      <p class="test-quote">"Recibí mi pedido perfectamente empacado y antes del tiempo estimado. El libro llegó en condiciones impecables. Ya hice una segunda compra."</p>
+      <p class="test-name">Valentina R.</p>
+      <p class="test-role">Bogotá — Compra verificada</p>
+    </article>
+    <article class="test-card reveal reveal-delay-1">
+      <div class="test-stars" aria-label="5 de 5 estrellas">★★★★★</div>
+      <p class="test-quote">"La descarga del libro digital fue inmediata. Compatible con mi Kindle sin ningún problema. La selección de títulos es excelente y los precios muy razonables."</p>
+      <p class="test-name">Camilo M.</p>
+      <p class="test-role">Medellín — Compra verificada</p>
+    </article>
+    <article class="test-card reveal reveal-delay-2">
+      <div class="test-stars" aria-label="5 de 5 estrellas">★★★★★</div>
+      <p class="test-quote">"El servicio al cliente es excepcional. Tuve una duda sobre un reembolso y la resolvieron el mismo día. Una librería que realmente se preocupa por sus clientes."</p>
+      <p class="test-name">Laura S.</p>
+      <p class="test-role">Cali — Compra verificada</p>
+    </article>
+  </div>
+</section>
+
+<!-- ══ CONTACTO ══ -->
+<section id="contacto" class="section" aria-labelledby="cont-h2">
+  <div class="contacto-grid">
+    <div class="reveal">
+      <p class="section-tag">Estamos para ti</p>
+      <h2 class="section-h2" id="cont-h2">Contáctanos</h2>
+      <p style="font-size:.95rem;color:var(--mid);margin-top:1.25rem;line-height:1.75;">
+        Respondemos todas las consultas en menos de 24 horas hábiles. Ya sea sobre un pedido, una devolución o una simple recomendación de lectura.
+      </p>
+      <div class="contact-list">
+        <div class="clist-item">
+          <div class="clist-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <div>
+            <p class="clist-label">Correo de soporte</p>
+            <p class="clist-val">hola@hn-libreria.com</p>
+          </div>
+        </div>
+        <div class="clist-item">
+          <div class="clist-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91A16 16 0 0 0 14.09 15.91l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <div>
+            <p class="clist-label">WhatsApp</p>
+            <p class="clist-val">+57 300 000 0000</p>
+          </div>
+        </div>
+        <div class="clist-item">
+          <div class="clist-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div>
+            <p class="clist-label">Horario de atención</p>
+            <p class="clist-val">Lun–Vie · 8:00 am – 6:00 pm</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="contact-form-wrap reveal reveal-delay-1">
+      <h3>Envíanos un mensaje</h3>
+      <div class="fg-row">
+        <div class="fg">
+          <label for="f-nombre">Nombre</label>
+          <input type="text" id="f-nombre" placeholder="Tu nombre" autocomplete="given-name" />
+        </div>
+        <div class="fg">
+          <label for="f-email">Correo</label>
+          <input type="email" id="f-email" placeholder="tu@correo.com" autocomplete="email" />
+        </div>
+      </div>
+      <div class="fg">
+        <label for="f-asunto">Asunto</label>
+        <select id="f-asunto">
+          <option value="">Selecciona un tema</option>
+          <option>Consulta sobre un pedido</option>
+          <option>Libro digital — descarga</option>
+          <option>Devolución o reembolso</option>
+          <option>Recomendación de libros</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label for="f-msg">Mensaje</label>
+        <textarea id="f-msg" placeholder="¿En qué podemos ayudarte?"></textarea>
+      </div>
+      <button class="btn-fill" style="width:100%;justify-content:center;padding:.9rem;" onclick="sendForm(event)">
+        Enviar mensaje →
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ══ LEGALES ══ -->
+<section id="legales" class="section" aria-labelledby="leg-h2">
+  <div>
+    <p class="section-tag">Información legal</p>
+    <h2 class="section-h2" id="leg-h2">Políticas y condiciones</h2>
+  </div>
+  <div class="legales-grid">
+    <article class="legal-card reveal">
+      <div class="legal-icon" aria-hidden="true">🔏</div>
+      <h3 class="legal-h3">Política de privacidad</h3>
+      <p class="legal-body">Recopilamos únicamente los datos necesarios para procesar tu pedido: nombre, correo y dirección de envío. Nunca vendemos ni compartimos tu información con terceros. Cumplimos con la Ley 1581 de 2012 (Habeas Data, Colombia). Puedes solicitar la eliminación de tus datos en cualquier momento escribiéndonos.</p>
+      <a href="#legales" class="legal-more">Leer completo →</a>
+    </article>
+    <article class="legal-card reveal reveal-delay-1">
+      <div class="legal-icon" aria-hidden="true">📋</div>
+      <h3 class="legal-h3">Términos y condiciones</h3>
+      <p class="legal-body">Al realizar una compra aceptas nuestros términos. Los precios están en pesos colombianos (COP) e incluyen IVA. Los libros digitales son de uso personal y no pueden redistribuirse. Los libros físicos se despachan en 1–3 días hábiles tras la confirmación de pago. La disponibilidad de stock es en tiempo real.</p>
+      <a href="#legales" class="legal-more">Leer completo →</a>
+    </article>
+    <article class="legal-card reveal reveal-delay-2">
+      <div class="legal-icon" aria-hidden="true">↩️</div>
+      <h3 class="legal-h3">Política de reembolsos</h3>
+      <p class="legal-body">Si tu libro físico llega dañado o es incorrecto, te enviamos uno nuevo sin costo. Para libros digitales con error técnico en el archivo, realizamos reembolso completo. Todas las solicitudes deben hacerse dentro de los 30 días posteriores a la compra contactando a hola@hn-libreria.com.</p>
+      <a href="#legales" class="legal-more">Leer completo →</a>
+    </article>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer role="contentinfo">
+  <div class="footer-top">
+    <div>
+      <span class="footer-brand-logo">H<em>N</em></span>
+      <p class="footer-brand-desc">Librería online con selección editorial cuidadosa. Libros físicos y digitales desde 2019.</p>
+      <p style="font-size:.75rem;color:rgba(245,243,239,.2);margin-top:.75rem;">NIT: 901.567.890-1</p>
+      <div class="footer-socials" aria-label="Redes sociales">
+        <!-- Instagram -->
+        <a href="#" class="social-btn" aria-label="Instagram de HN Librería">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor"/></svg>
+        </a>
+        <!-- Facebook -->
+        <a href="#" class="social-btn" aria-label="Facebook de HN Librería">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        </a>
+        <!-- Twitter/X -->
+        <a href="#" class="social-btn" aria-label="X/Twitter de HN Librería">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4l16 16M4 20L20 4"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Tienda</h4>
+      <ul class="footer-links">
+        <li><a href="#catalogo">Catálogo completo</a></li>
+        <li><a href="#destacados">Libros destacados</a></li>
+        <li><a href="#catalogo">Novedades</a></li>
+        <li><a href="#catalogo">Libros digitales</a></li>
+        <li><a href="#catalogo">Libros físicos</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Información</h4>
+      <ul class="footer-links">
+        <li><a href="#nosotros">Sobre HN</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+        <li><a href="#legales">Privacidad</a></li>
+        <li><a href="#legales">Términos</a></li>
+        <li><a href="#legales">Reembolsos</a></li>
+      </ul>
+    </div>
+    <div class="footer-col footer-news">
+      <h4>Newsletter</h4>
+      <p>Novedades y ofertas exclusivas directamente en tu correo. Sin spam.</p>
+      <div class="news-form">
+        <input type="email" class="news-input" placeholder="tu@correo.com" aria-label="Correo para suscripción" />
+        <button class="news-submit" onclick="subscribe()" aria-label="Suscribirse">OK</button>
+      </div>
+      <p style="font-size:.72rem;color:rgba(245,243,239,.2);margin-top:.6rem;">Cancela cuando quieras.</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-copy">© <span id="yr"></span> HN Librería. Todos los derechos reservados.</p>
+    <nav class="footer-legal-links" aria-label="Links legales">
+      <a href="#legales">Privacidad</a>
+      <a href="#legales">Términos</a>
+      <a href="#legales">Reembolsos</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+  </div>
+</footer>
+
+<!-- BACK TO TOP -->
+<button id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Volver arriba">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<!-- TOAST -->
+<div class="toast" id="toast" role="alert" aria-live="polite">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toastMsg">Añadido al carrito</span>
+</div>
+
+<!-- MODAL -->
+<div class="modal-wrap" id="modalWrap" role="dialog" aria-modal="true" aria-labelledby="mTitle" onclick="closeModalBg(event)">
+  <div class="modal-box" id="modalBox">
+    <button class="modal-x" onclick="closeModal()" aria-label="Cerrar">✕</button>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+/* ─── DATA ─── */
+const DB = [
+  { id:0, title:"El nombre del viento", author:"Patrick Rothfuss", genre:"Fantasía", cat:"literatura",
+    price:"$42.000", old:"$55.000", fmt:"b",
+    img:"https://images.unsplash.com/photo-1587560699334-cc4ff634909a?w=400&h=600&fit=crop",
+    fmtLabel:"Físico + Digital",
+    desc:"La historia de Kvothe, el estudiante de magia más brillante de su generación.",
+    descFull:"Kvothe narra por primera vez la historia de su extraordinaria vida. Desde sus humildes comienzos como hijo de una troupe de artistas itinerantes, pasando por los años viviendo en la calle, hasta su ingreso en la Universidad donde aprende a dar nombre al viento. Una épica de fantasía que ha conquistado millones de lectores.",
+    bio:"Patrick Rothfuss (1973) es escritor estadounidense de fantasía épica. Su debut en 2007 lo catapultó a la fama internacional." },
+  { id:1, title:"Sapiens", author:"Yuval Noah Harari", genre:"Historia", cat:"historia",
+    price:"$38.000", old:null, fmt:"b",
+    img:"https://images.unsplash.com/photo-1589998059171-988d887df646?w=400&h=600&fit=crop",
+    fmtLabel:"Físico + Digital",
+    desc:"Breve historia de la humanidad desde los primeros homínidos hasta la era tecnológica.",
+    descFull:"De los mamíferos insignificantes que éramos hace 70.000 años a los amos del mundo. Harari explora cómo la biología, la cultura y la historia moldearon al ser humano y hacia dónde nos dirigimos. Una obra que cambia la manera en que nos vemos a nosotros mismos.",
+    bio:"Yuval Noah Harari es historiador y profesor en la Universidad Hebrea de Jerusalén. Sus obras han sido traducidas a más de 60 idiomas." },
+  { id:2, title:"Cosmos", author:"Carl Sagan", genre:"Ciencia", cat:"ciencia",
+    price:"$35.000", old:"$44.000", fmt:"d",
+    img:"https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=600&fit=crop",
+    fmtLabel:"Solo Digital (ePub + PDF)",
+    desc:"Viaje majestuoso por el universo, desde el Big Bang hasta la búsqueda de vida extraterrestre.",
+    descFull:"Carl Sagan nos lleva en un viaje de descubrimiento por el universo, explorando la historia de la astronomía, la evolución de la vida y la búsqueda de civilizaciones extraterrestres. Un clásico atemporal que inspira asombro y curiosidad científica.",
+    bio:"Carl Sagan (1934–1996) fue astrónomo, astrofísico y divulgador científico. Recibió el Premio Pulitzer por 'El dragón del Edén'." },
+  { id:3, title:"1984", author:"George Orwell", genre:"Distopía", cat:"literatura",
+    price:"$28.000", old:null, fmt:"b",
+    img:"https://images.unsplash.com/photo-1495640388908-05fa85288e61?w=400&h=600&fit=crop",
+    fmtLabel:"Físico + Digital",
+    desc:"Novela distópica sobre un régimen totalitario donde el pensamiento libre está prohibido.",
+    descFull:"Winston Smith vive en un estado totalitario dominado por el omnipresente Gran Hermano. En este mundo donde el pensamiento libre es un crimen, Winston comienza un diario clandestino y se enamora de Julia. Una de las obras más influyentes y vigentes del siglo XX.",
+    bio:"George Orwell (1903–1950), pseudónimo de Eric Arthur Blair, fue escritor y periodista británico. Autor también de 'Rebelión en la granja'." },
+  { id:4, title:"El principito", author:"Antoine de Saint-Exupéry", genre:"Literatura", cat:"literatura",
+    price:"$22.000", old:null, fmt:"b",
+    img:"https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop",
+    fmtLabel:"Físico + Digital",
+    desc:"Cuento filosófico sobre la infancia, la amistad y lo que realmente importa en la vida.",
+    descFull:"Un piloto que aterriza en el Sáhara conoce a un misterioso niño llegado de un asteroide lejano. A través de sus conversaciones se exploran temas profundos con sencillez poética: la amistad verdadera, la soledad, el amor y la pérdida de la inocencia.",
+    bio:"Antoine de Saint-Exupéry (1900–1944) fue aviador y escritor francés. Desapareció durante una misión de reconocimiento en 1944." },
+  { id:5, title:"Breve historia del tiempo", author:"Stephen Hawking", genre:"Física", cat:"ciencia",
+    price:"$33.000", old:"$42.000", fmt:"d",
+    img:"https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=400&h=600&fit=crop",
+    fmtLabel:"Solo Digital (PDF)",
+    desc:"Explicación accesible de los grandes misterios del universo para el público general.",
+    descFull:"Hawking explica para el público general el Big Bang, los agujeros negros, la naturaleza del tiempo y la posibilidad de una teoría unificada del universo. Escrito con claridad y humor, es un hito de la divulgación científica del siglo XX.",
+    bio:"Stephen Hawking (1942–2018) fue físico teórico y cosmólogo británico, considerado uno de los científicos más brillantes de su generación." },
+  { id:6, title:"La República", author:"Platón", genre:"Filosofía", cat:"filosofia",
+    price:"$25.000", old:null, fmt:"b",
+    img:"https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=600&fit=crop",
+    fmtLabel:"Físico + Digital",
+    desc:"Diálogo fundamental de la filosofía occidental sobre la justicia, la virtud y el Estado ideal.",
+    descFull:"Sócrates y sus interlocutores debaten sobre la naturaleza de la justicia, el alma humana y la organización del Estado ideal. La República es la base de la filosofía política occidental y sigue siendo una obra viva y provocadora en el siglo XXI.",
+    bio:"Platón (427–347 a.C.) fue filósofo griego, discípulo de Sócrates y maestro de Aristóteles. Fundó la Academia de Atenas." },
+  { id:7, title:"Cien años de soledad", author:"Gabriel García Márquez", genre:"Realismo mágico", cat:"literatura",
+    price:"$36.000", old:null, fmt:"p",
+    img:"https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop",
+    fmtLabel:"Solo Físico",
+    desc:"La épica saga de la familia Buendía en el mítico pueblo de Macondo. Premio Nobel.",
+    descFull:"A lo largo de siete generaciones la familia Buendía vive y muere en Macondo. Amor, guerra, magia y tragedia se entrelazan en esta obra cumbre del realismo mágico latinoamericano. Premio Nobel de Literatura 1982.",
+    bio:"Gabriel García Márquez (1927–2014) fue escritor y periodista colombiano. Premio Nobel de Literatura 1982, considerado uno de los más grandes narradores del siglo XX." }
+];
+
+/* ─── RENDER ─── */
+function renderGrid(data) {
+  document.getElementById('grid').innerHTML = data.map((b,i) => `
+    <article class="bcard reveal" style="transition-delay:${i*.05}s" onclick="openModal(${b.id})" role="button" tabindex="0" aria-label="Ver ${b.title}">
+      <div class="bcard-cover">
+        <img src="${b.img}" alt="Portada de ${b.title}" loading="lazy" />
+        <span class="bcard-fmt ${b.fmt==='d'?'d':b.fmt==='b'?'b':''}">${b.fmt==='d'?'Digital':b.fmt==='b'?'Físico+Digital':'Físico'}</span>
+      </div>
+      <p class="bcard-genre">${b.genre}</p>
+      <h3 class="bcard-title">${b.title}</h3>
+      <p class="bcard-author">${b.author}</p>
+      <p class="bcard-desc">${b.desc}</p>
+      <div class="bcard-foot">
+        <div style="display:flex;align-items:baseline;gap:.4rem;">
+          <span class="bcard-price">${b.price}</span>
+          ${b.old ? `<span class="bcard-old">${b.old}</span>` : ''}
+        </div>
+        <button class="bcard-btn" onclick="event.stopPropagation();addCart('${b.title}')" aria-label="Añadir ${b.title}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+    </article>
+  `).join('');
+  initReveal();
+}
+function filterCat(cat, btn) {
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderGrid(cat==='todos' ? DB : DB.filter(b=>b.cat===cat));
+}
+function showMore() { toast('No hay más títulos en esta categoría'); }
+
+/* ─── MODAL ─── */
+function openModal(id) {
+  const b = DB[id]; if(!b) return;
+  document.getElementById('modalBody').innerHTML = `
+    <div class="modal-cover">
+      <img src="${b.img}" alt="Portada de ${b.title}" />
+    </div>
+    <div class="modal-info">
+      <p class="modal-tag">${b.genre}</p>
+      <h2 class="modal-title" id="mTitle">${b.title}</h2>
+      <p class="modal-author">Por ${b.author}</p>
+      <p class="modal-desc">${b.descFull}</p>
+      <div class="modal-bio">
+        <h4>Sobre el autor</h4>
+        <p>${b.bio}</p>
+      </div>
+      <div class="modal-pricing">
+        <span class="modal-price">${b.price} COP</span>
+        <span class="modal-format">${b.fmtLabel}</span>
+      </div>
+      <p style="font-size:.8rem;color:var(--mid);margin-top:.25rem;">${b.fmt==='d'?'📥 Descarga inmediata tras el pago':b.fmt==='p'?'📦 Envío en 3–7 días hábiles':'📦 Físico + 📥 Digital incluidos'}</p>
+      <div class="modal-cta">
+        <button class="btn-fill" onclick="addCart('${b.title}');closeModal()">🛒 Añadir al carrito</button>
+        <button class="btn-ghost" onclick="closeModal()">Seguir viendo →</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('modalWrap').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal() {
+  document.getElementById('modalWrap').classList.remove('open');
+  document.body.style.overflow='';
+}
+function closeModalBg(e) { if(e.target===document.getElementById('modalWrap')) closeModal(); }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+
+/* ─── CART / TOAST ─── */
+function addCart(t) { toast(`"${t}" añadido al carrito ✓`); }
+function toast(msg) {
+  const el=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+/* ─── FORM ─── */
+function sendForm(e) { e.preventDefault(); toast('Mensaje enviado. Respondemos en 24h ✓'); }
+function subscribe() { toast('¡Suscripción confirmada! Gracias ✓'); }
+
+/* ─── SCROLL REVEAL ─── */
+function initReveal() {
+  const obs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('on'); obs.unobserve(e.target); }});
+  },{threshold:.1});
+  document.querySelectorAll('.reveal:not(.on)').forEach(el=>obs.observe(el));
+}
+
+/* ─── BACK TO TOP ─── */
+window.addEventListener('scroll',()=>{
+  document.getElementById('btt').classList.toggle('show', window.scrollY>600);
+});
+
+/* ─── MOBILE NAV ─── */
+function toggleNav() {
+  const m=document.getElementById('mobileNav');
+  m.style.display=m.style.display==='none'?'block':'none';
+}
+
+/* ─── CURSOR ─── */
+const cur=document.getElementById('cursor');
+let mx=0, my=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX; my=e.clientY;
+  cur.style.left=mx+'px';
+  cur.style.top=my+'px';
+});
+document.addEventListener('mousedown',()=>cur.classList.add('click'));
+document.addEventListener('mouseup',()=>cur.classList.remove('click'));
+document.querySelectorAll('a,button,[role=button]').forEach(el=>{
+  el.addEventListener('mouseenter',()=>cur.classList.add('hover'));
+  el.addEventListener('mouseleave',()=>cur.classList.remove('hover'));
+});
+
+/* ─── LOADER ─── */
+window.addEventListener('load',()=>{
+  setTimeout(()=>document.getElementById('loader').classList.add('gone'),900);
+});
+
+/* ─── FOOTER YEAR ─── */
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+/* ─── INIT ─── */
+renderGrid(DB);
+initReveal();
+</script>
+</body>
+</html>
